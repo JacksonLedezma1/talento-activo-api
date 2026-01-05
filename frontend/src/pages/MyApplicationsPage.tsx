@@ -49,8 +49,10 @@ export const MyApplicationsPage: React.FC = () => {
                     {applications.map((app, index) => (
                         <motion.div
                             key={app.id}
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
+                            {...({
+                                initial: { opacity: 0, x: -20 },
+                                animate: { opacity: 1, x: 0 }
+                            } as any)}
                             transition={{ delay: index * 0.1 }}
                             className="bg-slate-900/40 border border-slate-800 p-6 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-6 hover:border-slate-700 transition-all"
                         >

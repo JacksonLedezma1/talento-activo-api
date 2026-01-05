@@ -12,7 +12,9 @@ import {
     Users,
     ArrowLeft,
     Loader2,
-    CheckCircle2
+    CheckCircle2,
+    Star,
+    Building2
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -27,7 +29,7 @@ export const CreateVacancyPage: React.FC = () => {
         seniority: '',
         softSkills: '',
         location: '',
-        modality: Modality.REMOTE,
+        modality: Modality.REMOTE as Modality,
         maxApplicants: 10,
         salaryRange: '',
         company: '',
@@ -42,7 +44,7 @@ export const CreateVacancyPage: React.FC = () => {
             setTimeout(() => navigate('/'), 2000);
         } catch (err) {
             console.error(err);
-            alert('Error al crear la vacante');
+            alert('Error al crear la vacante. Asegúrate de completar todos los campos obligatorios.');
         } finally {
             setLoading(false);
         }
@@ -52,8 +54,10 @@ export const CreateVacancyPage: React.FC = () => {
         return (
             <div className="min-h-screen flex items-center justify-center bg-[#0f172a]">
                 <motion.div
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
+                    {...({
+                        initial: { opacity: 0, scale: 0.9 },
+                        animate: { opacity: 1, scale: 1 }
+                    } as any)}
                     className="text-center space-y-4"
                 >
                     <div className="inline-flex p-4 rounded-full bg-emerald-500/10 text-emerald-500">
@@ -76,7 +80,7 @@ export const CreateVacancyPage: React.FC = () => {
                 Volver
             </button>
 
-            <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-8 backdrop-blur-sm">
+            <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-8 backdrop-blur-sm shadow-2xl">
                 <div className="flex items-center gap-3 mb-8">
                     <div className="p-3 bg-emerald-500/10 rounded-xl text-emerald-500">
                         <PlusCircle className="w-6 h-6" />
@@ -98,11 +102,11 @@ export const CreateVacancyPage: React.FC = () => {
                             icon={<Briefcase className="w-4 h-4" />}
                         />
                         <Input
-                            label="Sueldo estimado"
-                            value={formData.salaryRange}
-                            onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setFormData({ ...formData, salaryRange: e.target.value })}
-                            placeholder="Ej: $3000 - $4500 USD"
-                            icon={<DollarSign className="w-4 h-4" />}
+                            label="Empresa"
+                            value={formData.company}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setFormData({ ...formData, company: e.target.value })}
+                            placeholder="Ej: TalentoActivo Tech"
+                            icon={<Building2 className="w-4 h-4" />}
                         />
                     </div>
 
@@ -125,6 +129,17 @@ export const CreateVacancyPage: React.FC = () => {
                             placeholder="React, NestJS, AWS..."
                             icon={<Code className="w-4 h-4" />}
                         />
+                        <Input
+                            label="Soft Skills"
+                            required
+                            value={formData.softSkills}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setFormData({ ...formData, softSkills: e.target.value })}
+                            placeholder="Liderazgo, comunicación, trabajo en equipo..."
+                            icon={<Star className="w-4 h-4" />}
+                        />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-1.5">
                             <label className="text-sm font-semibold text-slate-300 ml-1">Modalidad</label>
                             <select
@@ -137,6 +152,13 @@ export const CreateVacancyPage: React.FC = () => {
                                 <option value={Modality.OFFICE}>Presencial</option>
                             </select>
                         </div>
+                        <Input
+                            label="Sueldo estimado"
+                            value={formData.salaryRange}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setFormData({ ...formData, salaryRange: e.target.value })}
+                            placeholder="Ej: $3000 - $4500 USD"
+                            icon={<DollarSign className="w-4 h-4" />}
+                        />
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -153,7 +175,7 @@ export const CreateVacancyPage: React.FC = () => {
                             type="number"
                             required
                             value={formData.maxApplicants}
-                            onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setFormData({ ...formData, maxApplicants: parseInt(e.target.value) })}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setFormData({ ...formData, maxApplicants: parseInt(e.target.value) || 1 })}
                             icon={<Users className="w-4 h-4" />}
                         />
                         <Input
@@ -169,7 +191,7 @@ export const CreateVacancyPage: React.FC = () => {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-emerald-500/20 disabled:opacity-50 flex justify-center items-center gap-2"
+                            className="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-emerald-500/20 disabled:opacity-50 flex justify-center items-center gap-2 active:scale-95"
                         >
                             {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Publicar Vacante'}
                         </button>

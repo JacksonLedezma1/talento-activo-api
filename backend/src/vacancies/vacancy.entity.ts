@@ -9,7 +9,7 @@ import { Application } from '../applications/application.entity';
 
 export enum Modality {
   REMOTE = 'remote',
-  ONSITE = 'onsite',
+  ONSITE = 'office',
   HYBRID = 'hybrid',
 }
 

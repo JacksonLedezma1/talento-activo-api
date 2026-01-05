@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
-import { Mail, Lock, Loader2, AlertCircle } from 'lucide-react';
+import { Mail, Lock, Loader2, AlertCircle, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export const LoginPage: React.FC = () => {
@@ -22,86 +22,110 @@ export const LoginPage: React.FC = () => {
             login(response.data.data.user, response.data.data.accessToken);
             navigate('/');
         } catch (err: any) {
-            setError(err.response?.data?.message || 'Error al iniciar sesión');
+            setError(err.response?.data?.message || 'Credenciales incorrectas');
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-[#0f172a]">
+        <div className="min-h-screen flex items-center justify-center px-4 py-12 relative overflow-hidden">
+            {/* Background blobs */}
+            <div className="absolute top-1/4 -left-20 w-80 h-80 bg-primary-500/10 rounded-full blur-[120px]" />
+            <div className="absolute bottom-1/4 -right-20 w-80 h-80 bg-indigo-500/10 rounded-full blur-[120px]" />
+
             <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="max-w-md w-full space-y-8 bg-slate-900/50 p-8 rounded-2xl border border-slate-800 backdrop-blur-sm"
+                {...({
+                    initial: { opacity: 0, scale: 0.95 },
+                    animate: { opacity: 1, scale: 1 }
+                } as any)}
+                className="max-w-md w-full glass-card p-10 rounded-[2.5rem] relative z-10"
             >
-                <div>
-                    <h2 className="mt-6 text-center text-3xl font-extrabold text-white">
-                        Bienvenido de nuevo
-                    </h2>
-                    <p className="mt-2 text-center text-sm text-slate-400">
-                        Ingresa a tu cuenta de TalentoActivo
-                    </p>
+                <div className="text-center mb-10">
+                    <div className="inline-flex p-3 bg-white rounded-2xl mb-6 shadow-xl">
+                        <motion.div
+                            {...({
+                                animate: { rotate: [0, 10, -10, 0] }
+                            } as any)}
+                            transition={{ repeat: Infinity, duration: 5 }}
+                        >
+                            <Lock className="w-8 h-8 text-slate-900" />
+                        </motion.div>
+                    </div>
+                    <h2 className="text-4xl font-extrabold text-white mb-2">Bienvenido</h2>
+                    <p className="text-slate-400 font-medium">Ingresa para continuar en TalentoActivo</p>
                 </div>
 
-                <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+                <form className="space-y-6" onSubmit={handleSubmit}>
                     {error && (
-                        <div className="flex items-center gap-2 p-4 bg-red-500/10 border border-red-500/20 text-red-500 rounded-xl text-sm italic">
-                            <AlertCircle className="w-4 h-4 shrink-0" />
+                        <motion.div
+                            {...({
+                                initial: { opacity: 0, y: -10 },
+                                animate: { opacity: 1, y: 0 }
+                            } as any)}
+                            className="flex items-center gap-3 p-4 bg-red-500/10 border border-red-500/20 text-red-400 rounded-2xl text-sm font-semibold"
+                        >
+                            <AlertCircle className="w-5 h-5 shrink-0" />
                             {error}
-                        </div>
+                        </motion.div>
                     )}
 
                     <div className="space-y-4">
-                        <div className="relative group">
-                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500 group-focus-within:text-primary-500 transition-colors">
-                                <Mail className="h-5 w-5" />
+                        <div className="space-y-1.5">
+                            <label className="text-sm font-bold text-slate-400 ml-1">Email</label>
+                            <div className="relative group">
+                                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-primary-500 transition-colors" />
+                                <input
+                                    type="email"
+                                    required
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    className="block w-full pl-12 pr-4 py-3.5 border border-slate-800 rounded-2xl bg-slate-900/50 text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 transition-all font-medium"
+                                    placeholder="ejemplo@correo.com"
+                                />
                             </div>
-                            <input
-                                type="email"
-                                required
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                className="block w-full pl-10 pr-3 py-3 border border-slate-700 rounded-xl bg-slate-800/50 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all sm:text-sm"
-                                placeholder="correo@ejemplo.com"
-                            />
                         </div>
-                        <div className="relative group">
-                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500 group-focus-within:text-primary-500 transition-colors">
-                                <Lock className="h-5 w-5" />
+
+                        <div className="space-y-1.5">
+                            <label className="text-sm font-bold text-slate-400 ml-1">Contraseña</label>
+                            <div className="relative group">
+                                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-primary-500 transition-colors" />
+                                <input
+                                    type="password"
+                                    required
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    className="block w-full pl-12 pr-4 py-3.5 border border-slate-800 rounded-2xl bg-slate-900/50 text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 transition-all font-medium"
+                                    placeholder="••••••••"
+                                />
                             </div>
-                            <input
-                                type="password"
-                                required
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                className="block w-full pl-10 pr-3 py-3 border border-slate-700 rounded-xl bg-slate-800/50 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all sm:text-sm"
-                                placeholder="••••••••"
-                            />
                         </div>
                     </div>
 
-                    <div>
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-bold rounded-xl text-white bg-primary-600 hover:bg-primary-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-all disabled:opacity-50 shadow-lg shadow-primary-500/20"
-                        >
-                            {loading ? (
-                                <Loader2 className="w-5 h-5 animate-spin" />
-                            ) : (
-                                'Iniciar Sesión'
-                            )}
-                        </button>
-                    </div>
+                    <button
+                        type="submit"
+                        disabled={loading}
+                        className="w-full flex justify-center items-center gap-3 py-4 bg-gradient-to-r from-primary-600 to-indigo-600 hover:from-primary-500 hover:to-indigo-500 text-white font-extrabold rounded-2xl transition-all shadow-xl shadow-primary-500/20 disabled:opacity-50 active:scale-95 mt-4"
+                    >
+                        {loading ? (
+                            <Loader2 className="w-5 h-5 animate-spin" />
+                        ) : (
+                            <>
+                                <span>Iniciar Sesión</span>
+                                <ArrowRight className="w-5 h-5" />
+                            </>
+                        )}
+                    </button>
                 </form>
 
-                <p className="mt-4 text-center text-sm text-slate-400">
-                    ¿No tienes cuenta?{' '}
-                    <Link to="/register" className="font-bold text-primary-500 hover:text-primary-400">
-                        Regístrate aquí
-                    </Link>
-                </p>
+                <div className="mt-8 pt-8 border-t border-slate-800 text-center">
+                    <p className="text-slate-400 font-medium">
+                        ¿Nuevo aquí?{' '}
+                        <Link to="/register" className="text-white font-extrabold hover:text-primary-400 transition-colors underline decoration-primary-500/30 underline-offset-4">
+                            Crea una cuenta gratis
+                        </Link>
+                    </p>
+                </div>
             </motion.div>
         </div>
     );

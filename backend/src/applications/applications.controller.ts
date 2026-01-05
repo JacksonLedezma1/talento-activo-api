@@ -7,7 +7,7 @@ import { ApplicationsService } from './applications.service';
 
 @Controller('applications')
 export class ApplicationsController {
-  constructor(private readonly applicationsService: ApplicationsService) {}
+  constructor(private readonly applicationsService: ApplicationsService) { }
 
   @Post()
   @Roles(Role.CODER)
@@ -22,9 +22,17 @@ export class ApplicationsController {
   }
 
   @Get()
-  @Roles(Role.GESTOR)
-  findAll(@Query('vacancyId') vacancyId?: string) {
+  @Roles(Role.GESTOR, Role.CODER)
+  findAll(
+    @CurrentUser() user: { sub: number; role: Role },
+    @Query('vacancyId') vacancyId?: string,
+  ) {
     const parsedVacancyId = vacancyId ? Number(vacancyId) : undefined;
-    return this.applicationsService.findAll({ vacancyId: parsedVacancyId });
+    const userId = user.role === Role.CODER ? user.sub : undefined;
+
+    return this.applicationsService.findAll({
+      vacancyId: parsedVacancyId,
+      userId,
+    });
   }
 }

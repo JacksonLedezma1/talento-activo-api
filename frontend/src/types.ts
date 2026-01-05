@@ -1,8 +1,9 @@
-export enum Role {
-    ADMIN = 'admin',
-    GESTOR = 'gestor',
-    CODER = 'coder',
-}
+export const Role = {
+    ADMIN: 'admin',
+    GESTOR: 'gestor',
+    CODER: 'coder',
+} as const;
+export type Role = typeof Role[keyof typeof Role];
 
 export interface User {
     id: number;
@@ -18,11 +19,12 @@ export interface AuthResponse {
     user: User;
 }
 
-export enum Modality {
-    OFFICE = 'office',
-    REMOTE = 'remote',
-    HYBRID = 'hybrid',
-}
+export const Modality = {
+    OFFICE: 'office',
+    REMOTE: 'remote',
+    HYBRID: 'hybrid',
+} as const;
+export type Modality = typeof Modality[keyof typeof Modality];
 
 export interface Vacancy {
     id: number;

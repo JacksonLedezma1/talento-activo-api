@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Briefcase, LogOut, User as UserIcon } from 'lucide-react';
+import { Briefcase, LogOut, User as UserIcon, LayoutDashboard, Send } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
     const { user, logout, isAuthenticated } = useAuth();
@@ -13,46 +13,62 @@ export const Navbar: React.FC = () => {
     };
 
     return (
-        <nav className="fixed top-0 w-full bg-slate-900/80 backdrop-blur-md border-b border-slate-800 z-50">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex items-center justify-between h-16">
+        <nav className="fixed top-0 w-full z-50 px-4 py-4">
+            <div className="max-w-7xl mx-auto glass rounded-2xl border border-white/5 border-b-white/10 shadow-2xl overflow-hidden">
+                <div className="px-6 sm:px-8 h-16 flex items-center justify-between">
                     <div className="flex items-center">
-                        <Link to="/" className="flex items-center gap-2 group">
-                            <div className="p-2 bg-primary-500 rounded-lg group-hover:bg-primary-400 transition-colors">
+                        <Link to="/" className="flex items-center gap-3 group">
+                            <div className="p-2.5 bg-gradient-to-br from-primary-500 to-indigo-600 rounded-xl shadow-lg group-hover:shadow-primary-500/30 group-hover:scale-105 transition-all">
                                 <Briefcase className="w-5 h-5 text-white" />
                             </div>
-                            <span className="text-xl font-bold text-white tracking-tight">Talento<span className="text-primary-500">Activo</span></span>
+                            <span className="text-xl font-extrabold text-white tracking-tight">
+                                Talento<span className="text-gradient">Activo</span>
+                            </span>
                         </Link>
                     </div>
 
-                    <div className="flex items-center gap-6">
+                    <div className="flex items-center gap-8">
                         {isAuthenticated ? (
                             <>
-                                <Link to="/my-applications" className="text-sm font-medium text-slate-300 hover:text-white transition-colors">
-                                    Mis Postulaciones
-                                </Link>
-                                <div className="flex items-center gap-2 text-slate-300">
-                                    <UserIcon className="w-4 h-4" />
-                                    <span className="text-sm font-medium">{user?.name}</span>
+                                <div className="hidden md:flex items-center gap-6">
+                                    <Link to="/" className="text-sm font-semibold text-slate-300 hover:text-white transition-colors flex items-center gap-2">
+                                        <LayoutDashboard className="w-4 h-4" />
+                                        Dashboard
+                                    </Link>
+                                    <Link to="/my-applications" className="text-sm font-semibold text-slate-300 hover:text-white transition-colors flex items-center gap-2">
+                                        <Send className="w-4 h-4" />
+                                        Mis Postulaciones
+                                    </Link>
                                 </div>
-                                <button
-                                    onClick={handleLogout}
-                                    className="flex items-center gap-2 text-sm font-medium text-slate-400 hover:text-white transition-colors"
-                                >
-                                    <LogOut className="w-4 h-4" />
-                                    Salir
-                                </button>
+
+                                <div className="h-6 w-px bg-slate-800 hidden md:block" />
+
+                                <div className="flex items-center gap-6">
+                                    <div className="flex items-center gap-2.5 px-3 py-1.5 bg-slate-800/50 rounded-lg border border-slate-700/50">
+                                        <div className="w-6 h-6 rounded-full bg-primary-500/20 flex items-center justify-center border border-primary-500/20">
+                                            <UserIcon className="w-3.5 h-3.5 text-primary-400" />
+                                        </div>
+                                        <span className="text-xs font-bold text-slate-200">{user?.name}</span>
+                                    </div>
+                                    <button
+                                        onClick={handleLogout}
+                                        className="p-2 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-all active:scale-90"
+                                        title="Cerrar Sesión"
+                                    >
+                                        <LogOut className="w-5 h-5" />
+                                    </button>
+                                </div>
                             </>
                         ) : (
-                            <div className="flex items-center gap-4">
-                                <Link to="/login" className="text-sm font-medium text-slate-300 hover:text-white transition-colors">
-                                    Iniciar Sesión
+                            <div className="flex items-center gap-5">
+                                <Link to="/login" className="text-sm font-bold text-slate-300 hover:text-white transition-colors">
+                                    Acceso
                                 </Link>
                                 <Link
                                     to="/register"
-                                    className="px-4 py-2 bg-primary-600 hover:bg-primary-500 text-white text-sm font-semibold rounded-lg transition-all shadow-lg shadow-primary-500/20"
+                                    className="px-6 py-2.5 bg-white text-slate-950 text-sm font-extrabold rounded-xl transition-all hover:bg-slate-200 active:scale-95 shadow-lg shadow-white/5"
                                 >
-                                    Registrarse
+                                    Unirse
                                 </Link>
                             </div>
                         )}

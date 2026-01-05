@@ -29,8 +29,10 @@ export const RegisterPage: React.FC = () => {
     return (
         <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-[#0f172a]">
             <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
+                {...({
+                    initial: { opacity: 0, y: 20 },
+                    animate: { opacity: 1, y: 0 }
+                } as any)}
                 className="max-w-md w-full space-y-8 bg-slate-900/50 p-8 rounded-2xl border border-slate-800 backdrop-blur-sm"
             >
                 <div>

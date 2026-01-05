@@ -75,16 +75,19 @@ export class ApplicationsService {
     return this.applicationsRepository.save(application);
   }
 
-  findAll(input?: { vacancyId?: number }) {
+  findAll(input?: { vacancyId?: number; userId?: number }) {
+    const where: any = {};
+
     if (input?.vacancyId) {
-      return this.applicationsRepository.find({
-        where: { vacancy: { id: input.vacancyId } },
-        relations: { user: true, vacancy: true },
-        order: { appliedAt: 'DESC' },
-      });
+      where.vacancy = { id: input.vacancyId };
+    }
+
+    if (input?.userId) {
+      where.user = { id: input.userId };
     }
 
     return this.applicationsRepository.find({
+      where,
       relations: { user: true, vacancy: true },
       order: { appliedAt: 'DESC' },
     });
