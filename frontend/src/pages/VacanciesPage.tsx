@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 import type { Vacancy, Application } from '../types';
 import { ApplicationStatus } from '../types';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 import { Briefcase, MapPin, Tag, Users, Search, PlusCircle, Loader2, Sparkles, DollarSign, Star, Info, CheckCircle, ClipboardList } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Modal } from '../components/Modal';
@@ -15,6 +15,7 @@ export const VacanciesPage: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedVacancy, setSelectedVacancy] = useState<Vacancy | null>(null);
     const [activeAppsCount, setActiveAppsCount] = useState(0);
+    const [userApplications, setUserApplications] = useState<Application[]>([]);
     const { isGestor, isAuthenticated } = useAuth();
 
     useEffect(() => {
@@ -47,10 +48,13 @@ export const VacanciesPage: React.FC = () => {
     const fetchData = async () => {
         setLoading(true);
         try {
-            await fetchVacancies();
+            // Fetch applications first if user is authenticated
+            let applications: Application[] = [];
             if (isAuthenticated && !isGestor) {
-                await fetchActiveApplications();
+                applications = await fetchActiveApplications();
             }
+            // Then fetch vacancies with applications data
+            await fetchVacancies(applications);
         } catch (err) {
             console.error(err);
         } finally {
@@ -58,20 +62,44 @@ export const VacanciesPage: React.FC = () => {
         }
     };
 
-    const fetchVacancies = async () => {
+    const fetchVacancies = async (applications?: Application[]) => {
         const response = await api.get('/vacancies');
-        setVacancies(response.data.data);
+        const vacanciesData = response.data.data;
+        
+        // Use provided applications or state
+        const appsToUse = applications || userApplications;
+        
+        // Map vacancies with application status if user is authenticated
+        if (isAuthenticated && !isGestor && appsToUse.length > 0) {
+            const enrichedVacancies = vacanciesData.map((vacancy: Vacancy) => {
+                const userApp = appsToUse.find(app => app.vacancy.id === vacancy.id);
+                return {
+                    ...vacancy,
+                    hasApplied: !!userApp,
+                    applicationStatus: userApp?.status
+                };
+            });
+            setVacancies(enrichedVacancies);
+        } else {
+            setVacancies(vacanciesData);
+        }
     };
 
-    const fetchActiveApplications = async () => {
+    const fetchActiveApplications = async (): Promise<Application[]> => {
         try {
-            const response = await api.get<Application[]>('/applications');
-            const activeCount = response.data.filter(app =>
+            const response = await api.get('/applications');
+            const applications = response.data.data || response.data;
+            setUserApplications(applications);
+            
+            const activeCount = applications.filter((app: Application) =>
                 app.status === ApplicationStatus.ACTIVA || app.status === ApplicationStatus.EN_PROCESO
             ).length;
             setActiveAppsCount(activeCount);
+            
+            return applications;
         } catch (error) {
             console.error('Error fetching applications count:', error);
+            return [];
         }
     };
 
@@ -83,8 +111,20 @@ export const VacanciesPage: React.FC = () => {
         try {
             await api.post('/applications', { vacancyId });
             alert('¡Postulación exitosa!');
-            fetchVacancies(); // Refresh to update button state
-            fetchActiveApplications(); // Refresh count
+            
+            // Refresh applications first, then vacancies with updated applications
+            const updatedApplications = await fetchActiveApplications();
+            await fetchVacancies(updatedApplications);
+            
+            // Update selected vacancy if modal is open
+            if (selectedVacancy && selectedVacancy.id === vacancyId) {
+                const userApp = updatedApplications.find(app => app.vacancy.id === vacancyId);
+                setSelectedVacancy({
+                    ...selectedVacancy,
+                    hasApplied: true,
+                    applicationStatus: userApp?.status
+                });
+            }
         } catch (err: any) {
             alert(err.response?.data?.message || 'Error al postularse');
         }

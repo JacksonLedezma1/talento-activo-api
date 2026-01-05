@@ -5,7 +5,7 @@ import { ArrowLeft, Trash2, AlertCircle, Sparkles } from 'lucide-react';
 import api from '../api/axios';
 import { ApplicationStatus } from '../types';
 import type { Application, Vacancy } from '../types';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 
 export const ManageVacancyPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();

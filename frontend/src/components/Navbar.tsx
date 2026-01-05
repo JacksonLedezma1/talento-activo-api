@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 import { Briefcase, LogOut, User as UserIcon, LayoutDashboard, Send } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
