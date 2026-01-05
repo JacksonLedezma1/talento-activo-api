@@ -63,25 +63,28 @@ describe('ApplicationsController', () => {
       const mockResult = [{ id: 1 }];
       service.findAll.mockResolvedValue(mockResult as any);
 
-      const result = await controller.findAll('5');
+      const user = { sub: 1, role: Role.GESTOR };
+      const result = await controller.findAll(user as any, '5');
 
-      expect(service.findAll).toHaveBeenCalledWith({ vacancyId: 5 });
+      expect(service.findAll).toHaveBeenCalledWith({ vacancyId: 5, userId: undefined });
       expect(result).toEqual(mockResult);
     });
 
     it('should call service.findAll with undefined if no vacancyId', async () => {
       service.findAll.mockResolvedValue([] as any);
 
-      await controller.findAll();
+      const user = { sub: 1, role: Role.CODER };
+      await controller.findAll(user as any);
 
-      expect(service.findAll).toHaveBeenCalledWith({ vacancyId: undefined });
+      expect(service.findAll).toHaveBeenCalledWith({ vacancyId: undefined, userId: 1 });
     });
 
     it('should propagate errors from applications service', async () => {
       const error = new Error('Database error');
       service.findAll.mockRejectedValue(error);
 
-      await expect(controller.findAll()).rejects.toThrow(error);
+      const user = { sub: 1, role: Role.CODER };
+      await expect(controller.findAll(user as any)).rejects.toThrow(error);
     });
   });
 });

@@ -8,14 +8,45 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors();
 
-  const config = new DocumentBuilder()
+  // Swagger setup con seguridad y tags
+  const options = new DocumentBuilder()
     .setTitle('Talento Activo API')
-    .setDescription('API para la gestión de vacantes y postulaciones')
+    .setDescription(`
+    ## Autenticación
+    - **API Key**: Header \`x-api-key\` con valor de \`API_KEY\` (ver .env)
+    - **JWT**: Header \`Authorization: Bearer <token>\` (obtenido en /auth/login)
+    
+    ## Roles
+    - \`CODER\`: ver vacantes activas, postularse
+    - \`GESTOR\`: gestionar vacantes y postulaciones
+    - \`ADMIN\`: acceso total
+    
+    ## Respuestas
+    Las respuestas exitosas están envueltas en:
+    \`\`\`json
+    {
+      "success": true,
+      "data": {},
+      "message": "Operación exitosa"
+    }
+    \`\`\`
+    `)
     .setVersion('1.0')
-    .addApiKey({ type: 'apiKey', name: 'x-api-key', in: 'header' }, 'api-key')
-    .addBearerAuth()
+    .addApiKey(
+      { type: 'apiKey', name: 'x-api-key', in: 'header', description: 'API Key para todas las peticiones' },
+      'api-key',
+    )
+    .addBearerAuth(
+      { type: 'http', scheme: 'bearer', bearerFormat: 'JWT', description: 'JWT token obtenido en /auth/login' },
+      'jwt',
+    )
+    .addTag('auth', 'Autenticación (público)')
+    .addTag('vacancies', 'Gestión de vacantes')
+    .addTag('applications', 'Postulaciones')
+    .addTag('users', 'Usuarios (solo admin)')
     .build();
-  const document = SwaggerModule.createDocument(app, config);
+
+  const document = SwaggerModule.createDocument(app, options);
   SwaggerModule.setup('docs', app, document);
 
   app.useGlobalInterceptors(new ResponseInterceptor());
@@ -28,7 +59,7 @@ async function bootstrap() {
     }),
   );
 
-  const port = process.env.PORT ?? 3000;
+  const port = process.env.PORT ?? 4000;
   await app.listen(port);
   console.log(`Application is running on: http://localhost:${port}`);
   console.log(` Swagger documentation available at: http://localhost:${port}/docs`);

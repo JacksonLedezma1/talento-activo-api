@@ -11,6 +11,17 @@ describe('ApplicationsService', () => {
   let applicationsRepo: jest.Mocked<Repository<Application>>;
   let vacanciesRepo: jest.Mocked<Repository<Vacancy>>;
 
+  const createApplicationsQueryBuilderMock = () => {
+    const qb = {
+      leftJoinAndSelect: jest.fn().mockReturnThis(),
+      loadRelationCountAndMap: jest.fn().mockReturnThis(),
+      andWhere: jest.fn().mockReturnThis(),
+      orderBy: jest.fn().mockReturnThis(),
+      getMany: jest.fn(),
+    };
+    return qb;
+  };
+
   const mockVacancy = {
     id: 1,
     isActive: true,
@@ -139,27 +150,33 @@ describe('ApplicationsService', () => {
   describe('findAll', () => {
     it('should return all applications when no vacancyId is provided', async () => {
       const mockApplications = [{ id: 1 }, { id: 2 }];
-      applicationsRepo.find.mockResolvedValue(mockApplications as any);
+      const qb = createApplicationsQueryBuilderMock();
+      qb.getMany.mockResolvedValue(mockApplications as any);
+      applicationsRepo.createQueryBuilder.mockReturnValue(qb as any);
 
       const result = await service.findAll();
 
-      expect(applicationsRepo.find).toHaveBeenCalledWith({
-        relations: { user: true, vacancy: true },
-        order: { appliedAt: 'DESC' },
-      });
+      expect(applicationsRepo.createQueryBuilder).toHaveBeenCalledWith('application');
+      expect(qb.leftJoinAndSelect).toHaveBeenCalledWith('application.user', 'user');
+      expect(qb.leftJoinAndSelect).toHaveBeenCalledWith('application.vacancy', 'vacancy');
+      expect(qb.loadRelationCountAndMap).toHaveBeenCalledWith(
+        'vacancy.applicantsCount',
+        'vacancy.applications',
+      );
+      expect(qb.orderBy).toHaveBeenCalledWith('application.appliedAt', 'DESC');
       expect(result).toEqual(mockApplications);
     });
 
     it('should return applications for a specific vacancyId', async () => {
       const mockApplications = [{ id: 1 }];
-      applicationsRepo.find.mockResolvedValue(mockApplications as any);
+      const qb = createApplicationsQueryBuilderMock();
+      qb.getMany.mockResolvedValue(mockApplications as any);
+      applicationsRepo.createQueryBuilder.mockReturnValue(qb as any);
 
       const result = await service.findAll({ vacancyId: 5 });
 
-      expect(applicationsRepo.find).toHaveBeenCalledWith({
-        where: { vacancy: { id: 5 } },
-        relations: { user: true, vacancy: true },
-        order: { appliedAt: 'DESC' },
+      expect(qb.andWhere).toHaveBeenCalledWith('application.vacancyId = :vacancyId', {
+        vacancyId: 5,
       });
       expect(result).toEqual(mockApplications);
     });

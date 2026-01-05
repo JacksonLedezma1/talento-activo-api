@@ -1,181 +1,135 @@
-# Talento Activo API 🚀
+# Talento Activo API
 
-API robusta construida con **NestJS**, **TypeORM** y **PostgreSQL** para la gestión de vacantes laborales y postulaciones de candidatos.
+API construida con **NestJS**, **TypeORM** y **PostgreSQL** para gestionar:
 
-## 👤 Información del Desarrollador
-- **Nombre:** [Tu Nombre / Coder Name]
-- **Proyecto:** Talento Activo - Gestión de Candidatos y Vacantes
+- Vacantes
+- Postulaciones
+- Autenticación (JWT)
+- Autorización (roles)
+- Protección global por API Key
 
-## 📋 Tabla de Contenidos
-- [Características](#-características)
-- [Tecnologías](#-tecnologías)
-- [Requisitos Previos](#-requisitos-previos)
-- [Instalación y Configuración](#-instalación-y-configuración)
-- [Roles y Permisos](#-roles-y-permisos)
-- [Documentación (Swagger)](#-documentación-swagger)
-- [Ejemplos de Endpoints](#-ejemplos-de-endpoints)
-- [Seguridad](#-seguridad)
-- [Pruebas](#-pruebas)
+## Requisitos
 
----
+- Node.js 18+
+- PostgreSQL 13+
 
-## ✨ Características
-- 🔐 **Autenticación Simple**: Registro e inicio de sesión con JWT.
-- 🛡️ **Seguridad Multinivel**: Guardias por API Key globales y Roles específicos.
-- 💼 **Gestión de Vacantes**: Creación, actualización y listado de ofertas laborales.
-- 📝 **Postulaciones**: Sistema de aplicaciones con reglas de negocio (máximo 3 postulaciones activas por usuario).
-- 🧪 **Calidad de Código**: Pruebas unitarias con Jest con cobertura superior al 60%.
+## Configuración
 
-## 🛠️ Tecnologías
-- **Framework**: [NestJS](https://nestjs.com/)
-- **ORM**: [TypeORM](https://typeorm.io/)
-- **Base de Datos**: [PostgreSQL](https://www.postgresql.org/)
-- **Validación**: `class-validator` & `class-transformer`
-- **Seguridad**: `bcrypt`, `passport-jwt`
-- **Documentación**: `Swagger`
-- **Testing**: `Jest`
+1) Instala dependencias
 
-## 🚀 Requisitos Previos
-- Node.js (v18.x o superior)
-- PostgreSQL
-- npm o yarn
+```bash
+npm install
+```
 
-## ⚙️ Instalación y Configuración
+2) Crea un archivo `.env`
 
-1. **Clonar el repositorio**
-   ```bash
-   git clone <url-del-repositorio>
-   cd talento-activo-api
-   ```
+Puedes basarte en `backend/.env.example`.
 
-2. **Instalar dependencias**
-   ```bash
-   npm install
-   ```
+```env
+DATABASE_HOST=localhost
+DATABASE_PORT=5432
+DATABASE_USER=postgres
+DATABASE_PASSWORD=postgres
+DATABASE_NAME=empleabilidad_db
 
-3. **Configurar variables de entorno**
-   Crea un archivo `.env` en la raíz del proyecto basándote en el siguiente ejemplo:
-   ```env
-   # Database
-   DATABASE_HOST=localhost
-   DATABASE_PORT=5432
-   DATABASE_USER=postgres
-   DATABASE_PASSWORD=tu_password
-   DATABASE_NAME=talento_activo
+JWT_SECRET=super_secret_jwt_key
+JWT_EXPIRES_IN=1d
 
-   # Security
-   JWT_SECRET=tu_secreto_super_seguro
-   API_KEY=tu_api_key_secreta
-   ```
+API_KEY=empleabilidad_api_key_123
 
-4. **Poblar la base de datos (Opcional)**
-   Si deseas cargar datos iniciales de prueba (usuarios, vacantes):
-   ```bash
-   npm run seed
-   ```
+# Por defecto el backend usa PORT=4000 en el entorno local del proyecto.
+# Si lo cambias aquí, ajusta el frontend (VITE_API_BASE_URL).
+PORT=4000
+```
 
-5. **Iniciar la aplicación**
-   ```bash
-   # Desarrollo
-   npm run start:dev
+## Ejecutar
 
-   # Producción
-   npm run build
-   npm run start:prod
-   ```
+```bash
+# desarrollo
+npm run start:dev
 
-## 👥 Roles y Permisos
-El sistema utiliza tres roles principales definidos en el enum `Role`:
-- `ADMIN`: Acceso total.
-- `GESTOR`: Puede crear y gestionar vacantes, ver postulaciones.
-- `CODER`: Puede ver vacantes activas y postularse a ellas.
+# build
+npm run build
 
-## 📡 Documentación (Swagger)
-Una vez iniciada la aplicación, puedes acceder a la documentación interactiva en:
-👉 **[http://localhost:3000/docs](http://localhost:3000/docs)**
+# producción
+npm run start:prod
+```
 
-## 📡 Ejemplos de Endpoints
+Por defecto queda en:
 
-### 1. Autenticación (Auth)
-#### Registro de Usuario
-`POST /auth/register`
+- API: `http://localhost:4000`
+- Swagger: `http://localhost:4000/docs`
+
+## Seed
+
+El seeder crea/asegura 2 usuarios:
+
+- Admin: `admin@talento.com` / `Admin123!`
+- Gestor: `gestor@talento.com` / `Gestor123!`
+
+Variables opcionales para personalizar:
+
+```env
+SEED_ADMIN_EMAIL=admin@talento.com
+SEED_ADMIN_PASSWORD=Admin123!
+SEED_GESTOR_EMAIL=gestor@talento.com
+SEED_GESTOR_PASSWORD=Gestor123!
+```
+
+Ejecutar:
+
+```bash
+npm run seed
+```
+
+## Seguridad (headers)
+
+Todas las requests (excepto rutas marcadas como públicas) requieren:
+
+- `x-api-key: <API_KEY>`
+- `Authorization: Bearer <JWT>`
+
+## Roles
+
+- `ADMIN`: acceso total
+- `GESTOR`: gestionar vacantes y postulaciones
+- `CODER`: ver vacantes activas y postularse
+
+## Respuesta estándar
+
+El backend envuelve respuestas exitosas con:
+
 ```json
-// Body
 {
-  "name": "John Doe",
-  "email": "john@example.com",
-  "password": "Password123!"
+  "success": true,
+  "data": {},
+  "message": "Operación exitosa"
 }
 ```
 
-#### Inicio de Sesión
-`POST /auth/login`
-```json
-// Body
-{
-  "email": "john@example.com",
-  "password": "Password123!"
-}
+## Endpoints principales
 
-// Response
-{
-  "accessToken": "eyJhbGciOiJIUzI1...",
-  "user": {
-    "id": 1,
-    "name": "John Doe",
-    "email": "john@example.com",
-    "role": "coder"
-  }
-}
-```
+Auth (públicos):
 
-### 2. Vacantes (Vacancies)
-#### Crear Vacante (Solo GESTOR)
-`POST /vacancies`
-```json
-// Body
-{
-  "title": "Backend Developer NestJS",
-  "description": "Buscamos experto en microservicios...",
-  "technologies": "NestJS, TypeScript, PostgreSQL",
-  "seniority": "Senior",
-  "softSkills": "Comunicación, Trabajo en equipo",
-  "location": "Remoto",
-  "modality": "remote",
-  "maxApplicants": 10
-}
-```
+- `POST /auth/register`
+- `POST /auth/login`
 
-#### Listar Vacantes
-`GET /vacancies`
-- Los **CODERS** solo recibirán vacantes activas.
-- Los **GESTORES/ADMINS** recibirán todas las vacantes.
+Vacantes:
 
-### 3. Postulaciones (Applications)
-#### Postularse a una Vacante (Solo CODER)
-`POST /applications`
-```json
-// Body
-{
-  "vacancyId": 1
-}
-```
+- `GET /vacancies` (CODER: solo activas; GESTOR/ADMIN: todas)
+- `POST /vacancies` (GESTOR)
+- `PATCH /vacancies/:id` (GESTOR)
 
-## 🔒 Seguridad
-1. **X-API-KEY**: Todas las peticiones requieren el header `x-api-key` con el valor definido en el `.env`.
-2. **JWT**: Endpoints protegidos requieren el header `Authorization: Bearer <token>`.
-3. **Roles**: Uso del decorador `@Roles()` para restringir acceso por tipo de usuario.
+Postulaciones:
 
-## 🧪 Pruebas
-Ejecución de todas las pruebas unitarias:
+- `POST /applications` (CODER)
+- `GET /applications` (CODER: propias; GESTOR: propias o por `?vacancyId=`)
+- `PATCH /applications/:id/status` (GESTOR)
+- `DELETE /applications/:id` (GESTOR, solo si estado es `Activa`)
+
+## Tests
+
 ```bash
 npm test
 ```
-
-Reporte de cobertura:
-```bash
-npm run test:cov
-```
-
----
 

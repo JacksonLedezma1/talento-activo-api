@@ -13,6 +13,17 @@ describe('VacanciesService', () => {
   let vacanciesRepo: jest.Mocked<Repository<Vacancy>>;
   let applicationsRepo: jest.Mocked<Repository<Application>>;
 
+  const createVacancyQueryBuilderMock = () => {
+    const qb = {
+      loadRelationCountAndMap: jest.fn().mockReturnThis(),
+      where: jest.fn().mockReturnThis(),
+      orderBy: jest.fn().mockReturnThis(),
+      getMany: jest.fn(),
+      getOne: jest.fn(),
+    };
+    return qb;
+  };
+
   const mockVacancy: Vacancy = {
     id: 1,
     title: 'NestJS Developer',
@@ -34,12 +45,12 @@ describe('VacanciesService', () => {
     const mockVacanciesRepo = {
       create: jest.fn(),
       save: jest.fn(),
-      find: jest.fn(),
-      findOne: jest.fn(),
+      createQueryBuilder: jest.fn(),
     };
 
     const mockApplicationsRepo = {
       count: jest.fn(),
+      findOne: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -93,34 +104,44 @@ describe('VacanciesService', () => {
 
   describe('findAll', () => {
     it('should return all vacancies', async () => {
-      vacanciesRepo.find.mockResolvedValue([mockVacancy]);
+      const qb = createVacancyQueryBuilderMock();
+      qb.getMany.mockResolvedValue([mockVacancy]);
+      vacanciesRepo.createQueryBuilder.mockReturnValue(qb as any);
 
       const result = await service.findAll();
 
-      expect(vacanciesRepo.find).toHaveBeenCalledWith({
-        order: { createdAt: 'DESC' },
-      });
+      expect(vacanciesRepo.createQueryBuilder).toHaveBeenCalledWith('vacancy');
+      expect(qb.loadRelationCountAndMap).toHaveBeenCalledWith(
+        'vacancy.applicantsCount',
+        'vacancy.applications',
+      );
+      expect(qb.orderBy).toHaveBeenCalledWith('vacancy.createdAt', 'DESC');
       expect(result).toEqual([mockVacancy]);
     });
   });
 
   describe('findActive', () => {
     it('should return only active vacancies', async () => {
-      vacanciesRepo.find.mockResolvedValue([mockVacancy]);
+      const qb = createVacancyQueryBuilderMock();
+      qb.getMany.mockResolvedValue([mockVacancy]);
+      vacanciesRepo.createQueryBuilder.mockReturnValue(qb as any);
 
       const result = await service.findActive();
 
-      expect(vacanciesRepo.find).toHaveBeenCalledWith({
-        where: { isActive: true },
-        order: { createdAt: 'DESC' },
+      expect(vacanciesRepo.createQueryBuilder).toHaveBeenCalledWith('vacancy');
+      expect(qb.where).toHaveBeenCalledWith('vacancy.isActive = :isActive', {
+        isActive: true,
       });
+      expect(qb.orderBy).toHaveBeenCalledWith('vacancy.createdAt', 'DESC');
       expect(result).toEqual([mockVacancy]);
     });
   });
 
   describe('findById', () => {
     it('should return a vacancy by id', async () => {
-      vacanciesRepo.findOne.mockResolvedValue(mockVacancy);
+      const qb = createVacancyQueryBuilderMock();
+      qb.getOne.mockResolvedValue(mockVacancy);
+      vacanciesRepo.createQueryBuilder.mockReturnValue(qb as any);
 
       const result = await service.findById(1);
 
@@ -128,7 +149,9 @@ describe('VacanciesService', () => {
     });
 
     it('should throw NotFoundException if vacancy not found', async () => {
-      vacanciesRepo.findOne.mockResolvedValue(null);
+      const qb = createVacancyQueryBuilderMock();
+      qb.getOne.mockResolvedValue(null);
+      vacanciesRepo.createQueryBuilder.mockReturnValue(qb as any);
 
       await expect(service.findById(999)).rejects.toThrow(NotFoundException);
     });
@@ -137,7 +160,10 @@ describe('VacanciesService', () => {
   describe('update', () => {
     it('should update a vacancy successfully', async () => {
       const dto: UpdateVacancyDto = { title: 'Updated' };
-      vacanciesRepo.findOne.mockResolvedValue(mockVacancy);
+      const qb = createVacancyQueryBuilderMock();
+      qb.getOne.mockResolvedValue(mockVacancy);
+      vacanciesRepo.createQueryBuilder.mockReturnValue(qb as any);
+
       vacanciesRepo.save.mockResolvedValue({
         ...mockVacancy,
         title: 'Updated',
@@ -150,7 +176,10 @@ describe('VacanciesService', () => {
 
     it('should throw BadRequestException if maxApplicants is less than current applicants', async () => {
       const dto: UpdateVacancyDto = { maxApplicants: 2 };
-      vacanciesRepo.findOne.mockResolvedValue(mockVacancy);
+      const qb = createVacancyQueryBuilderMock();
+      qb.getOne.mockResolvedValue(mockVacancy);
+      vacanciesRepo.createQueryBuilder.mockReturnValue(qb as any);
+
       applicationsRepo.count.mockResolvedValue(5);
 
       await expect(service.update(1, dto)).rejects.toThrow(BadRequestException);
