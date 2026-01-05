@@ -1,98 +1,181 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Talento Activo API 🚀
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+API robusta construida con **NestJS**, **TypeORM** y **PostgreSQL** para la gestión de vacantes laborales y postulaciones de candidatos.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## 👤 Información del Desarrollador
+- **Nombre:** [Tu Nombre / Coder Name]
+- **Proyecto:** Talento Activo - Gestión de Candidatos y Vacantes
 
-## Description
+## 📋 Tabla de Contenidos
+- [Características](#-características)
+- [Tecnologías](#-tecnologías)
+- [Requisitos Previos](#-requisitos-previos)
+- [Instalación y Configuración](#-instalación-y-configuración)
+- [Roles y Permisos](#-roles-y-permisos)
+- [Documentación (Swagger)](#-documentación-swagger)
+- [Ejemplos de Endpoints](#-ejemplos-de-endpoints)
+- [Seguridad](#-seguridad)
+- [Pruebas](#-pruebas)
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+---
 
-## Project setup
+## ✨ Características
+- 🔐 **Autenticación Simple**: Registro e inicio de sesión con JWT.
+- 🛡️ **Seguridad Multinivel**: Guardias por API Key globales y Roles específicos.
+- 💼 **Gestión de Vacantes**: Creación, actualización y listado de ofertas laborales.
+- 📝 **Postulaciones**: Sistema de aplicaciones con reglas de negocio (máximo 3 postulaciones activas por usuario).
+- 🧪 **Calidad de Código**: Pruebas unitarias con Jest con cobertura superior al 60%.
 
-```bash
-$ npm install
+## 🛠️ Tecnologías
+- **Framework**: [NestJS](https://nestjs.com/)
+- **ORM**: [TypeORM](https://typeorm.io/)
+- **Base de Datos**: [PostgreSQL](https://www.postgresql.org/)
+- **Validación**: `class-validator` & `class-transformer`
+- **Seguridad**: `bcrypt`, `passport-jwt`
+- **Documentación**: `Swagger`
+- **Testing**: `Jest`
+
+## 🚀 Requisitos Previos
+- Node.js (v18.x o superior)
+- PostgreSQL
+- npm o yarn
+
+## ⚙️ Instalación y Configuración
+
+1. **Clonar el repositorio**
+   ```bash
+   git clone <url-del-repositorio>
+   cd talento-activo-api
+   ```
+
+2. **Instalar dependencias**
+   ```bash
+   npm install
+   ```
+
+3. **Configurar variables de entorno**
+   Crea un archivo `.env` en la raíz del proyecto basándote en el siguiente ejemplo:
+   ```env
+   # Database
+   DATABASE_HOST=localhost
+   DATABASE_PORT=5432
+   DATABASE_USER=postgres
+   DATABASE_PASSWORD=tu_password
+   DATABASE_NAME=talento_activo
+
+   # Security
+   JWT_SECRET=tu_secreto_super_seguro
+   API_KEY=tu_api_key_secreta
+   ```
+
+4. **Poblar la base de datos (Opcional)**
+   Si deseas cargar datos iniciales de prueba (usuarios, vacantes):
+   ```bash
+   npm run seed
+   ```
+
+5. **Iniciar la aplicación**
+   ```bash
+   # Desarrollo
+   npm run start:dev
+
+   # Producción
+   npm run build
+   npm run start:prod
+   ```
+
+## 👥 Roles y Permisos
+El sistema utiliza tres roles principales definidos en el enum `Role`:
+- `ADMIN`: Acceso total.
+- `GESTOR`: Puede crear y gestionar vacantes, ver postulaciones.
+- `CODER`: Puede ver vacantes activas y postularse a ellas.
+
+## 📡 Documentación (Swagger)
+Una vez iniciada la aplicación, puedes acceder a la documentación interactiva en:
+👉 **[http://localhost:3000/docs](http://localhost:3000/docs)**
+
+## 📡 Ejemplos de Endpoints
+
+### 1. Autenticación (Auth)
+#### Registro de Usuario
+`POST /auth/register`
+```json
+// Body
+{
+  "name": "John Doe",
+  "email": "john@example.com",
+  "password": "Password123!"
+}
 ```
 
-## Compile and run the project
+#### Inicio de Sesión
+`POST /auth/login`
+```json
+// Body
+{
+  "email": "john@example.com",
+  "password": "Password123!"
+}
 
-```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+// Response
+{
+  "accessToken": "eyJhbGciOiJIUzI1...",
+  "user": {
+    "id": 1,
+    "name": "John Doe",
+    "email": "john@example.com",
+    "role": "coder"
+  }
+}
 ```
 
-## Run tests
-
-```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+### 2. Vacantes (Vacancies)
+#### Crear Vacante (Solo GESTOR)
+`POST /vacancies`
+```json
+// Body
+{
+  "title": "Backend Developer NestJS",
+  "description": "Buscamos experto en microservicios...",
+  "technologies": "NestJS, TypeScript, PostgreSQL",
+  "seniority": "Senior",
+  "softSkills": "Comunicación, Trabajo en equipo",
+  "location": "Remoto",
+  "modality": "remote",
+  "maxApplicants": 10
+}
 ```
 
-## Deployment
+#### Listar Vacantes
+`GET /vacancies`
+- Los **CODERS** solo recibirán vacantes activas.
+- Los **GESTORES/ADMINS** recibirán todas las vacantes.
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+### 3. Postulaciones (Applications)
+#### Postularse a una Vacante (Solo CODER)
+`POST /applications`
+```json
+// Body
+{
+  "vacancyId": 1
+}
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+## 🔒 Seguridad
+1. **X-API-KEY**: Todas las peticiones requieren el header `x-api-key` con el valor definido en el `.env`.
+2. **JWT**: Endpoints protegidos requieren el header `Authorization: Bearer <token>`.
+3. **Roles**: Uso del decorador `@Roles()` para restringir acceso por tipo de usuario.
 
-## Resources
+## 🧪 Pruebas
+Ejecución de todas las pruebas unitarias:
+```bash
+npm test
+```
 
-Check out a few resources that may come in handy when working with NestJS:
+Reporte de cobertura:
+```bash
+npm run test:cov
+```
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+---
 
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
