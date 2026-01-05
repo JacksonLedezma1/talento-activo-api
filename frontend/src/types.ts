@@ -38,13 +38,25 @@ export interface Vacancy {
     salaryRange?: string;
     company?: string;
     maxApplicants: number;
+    applicantsCount: number;
+    hasApplied?: boolean;
+    applicationStatus?: ApplicationStatus;
     isActive: boolean;
     createdAt: string;
 }
+
+export const ApplicationStatus = {
+    ACTIVA: 'Activa',
+    EN_PROCESO: 'En proceso',
+    APROBADA: 'Aprobada',
+    RECHAZADA: 'Rechazada',
+} as const;
+export type ApplicationStatus = typeof ApplicationStatus[keyof typeof ApplicationStatus];
 
 export interface Application {
     id: number;
     appliedAt: string;
     user: User;
     vacancy: Vacancy;
+    status: ApplicationStatus;
 }

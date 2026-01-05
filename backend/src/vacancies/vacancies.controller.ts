@@ -8,6 +8,7 @@ import {
   ParseIntPipe,
 } from '@nestjs/common';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
+import type { AuthUser } from '../common/decorators/current-user.decorator';
 import { Roles } from '../common/decorators/roles.decorator';
 import { Role } from '../users/users.entities';
 import { CreateVacancyDto } from './dto/create-vacancy.dto';
@@ -16,15 +17,20 @@ import { VacanciesService } from './vacancies.service';
 
 @Controller('vacancies')
 export class VacanciesController {
-  constructor(private readonly vacanciesService: VacanciesService) {}
+  constructor(private readonly vacanciesService: VacanciesService) { }
 
   @Get()
-  findAll(@CurrentUser() user: { role: Role }) {
+  findAll(@CurrentUser() user: AuthUser) {
     if (user.role === Role.CODER) {
-      return this.vacanciesService.findActive();
+      return this.vacanciesService.findActive(user.sub);
     }
 
-    return this.vacanciesService.findAll();
+    return this.vacanciesService.findAll(user.sub);
+  }
+
+  @Get(':id')
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.vacanciesService.findById(id);
   }
 
   @Post()

@@ -29,21 +29,54 @@ export class VacanciesService {
     return this.vacanciesRepository.save(vacancy);
   }
 
-  findAll() {
-    return this.vacanciesRepository.find({
-      order: { createdAt: 'DESC' },
-    });
+  async findAll(userId?: number) {
+    const vacancies = await this.vacanciesRepository
+      .createQueryBuilder('vacancy')
+      .loadRelationCountAndMap('vacancy.applicantsCount', 'vacancy.applications')
+      .orderBy('vacancy.createdAt', 'DESC')
+      .getMany();
+
+    if (userId) {
+      for (const vacancy of vacancies) {
+        const application = await this.applicationsRepository.findOne({
+          where: { vacancy: { id: vacancy.id }, user: { id: userId } },
+        });
+        vacancy.hasApplied = !!application;
+        vacancy.applicationStatus = application?.status;
+      }
+    }
+
+    return vacancies;
   }
 
-  findActive() {
-    return this.vacanciesRepository.find({
-      where: { isActive: true },
-      order: { createdAt: 'DESC' },
-    });
+  async findActive(userId?: number) {
+    const vacancies = await this.vacanciesRepository
+      .createQueryBuilder('vacancy')
+      .loadRelationCountAndMap('vacancy.applicantsCount', 'vacancy.applications')
+      .where('vacancy.isActive = :isActive', { isActive: true })
+      .orderBy('vacancy.createdAt', 'DESC')
+      .getMany();
+
+    if (userId) {
+      for (const vacancy of vacancies) {
+        const application = await this.applicationsRepository.findOne({
+          where: { vacancy: { id: vacancy.id }, user: { id: userId } },
+        });
+        vacancy.hasApplied = !!application;
+        vacancy.applicationStatus = application?.status;
+      }
+    }
+
+    return vacancies;
   }
 
   async findById(id: number) {
-    const vacancy = await this.vacanciesRepository.findOne({ where: { id } });
+    const vacancy = await this.vacanciesRepository
+      .createQueryBuilder('vacancy')
+      .loadRelationCountAndMap('vacancy.applicantsCount', 'vacancy.applications')
+      .where('vacancy.id = :id', { id })
+      .getOne();
+
     if (!vacancy) {
       throw new NotFoundException('Vacante no encontrada.');
     }

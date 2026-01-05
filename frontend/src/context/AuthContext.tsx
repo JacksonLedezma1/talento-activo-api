@@ -9,6 +9,7 @@ interface AuthContextType {
     logout: () => void;
     isAuthenticated: boolean;
     isGestor: boolean;
+    loading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -16,6 +17,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
     const [token, setToken] = useState<string | null>(null);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const savedUser = localStorage.getItem('user');
@@ -24,6 +26,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setUser(JSON.parse(savedUser));
             setToken(savedToken);
         }
+        setLoading(false);
     }, []);
 
     const login = (user: User, accessToken: string) => {
@@ -44,7 +47,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const isGestor = user?.role === Role.GESTOR || user?.role === Role.ADMIN;
 
     return (
-        <AuthContext.Provider value={{ user, token, login, logout, isAuthenticated, isGestor }}>
+        <AuthContext.Provider value={{ user, token, login, logout, isAuthenticated, isGestor, loading }}>
             {children}
         </AuthContext.Provider>
     );

@@ -1,11 +1,12 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Briefcase, LogOut, User as UserIcon, LayoutDashboard, Send } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
     const { user, logout, isAuthenticated } = useAuth();
     const navigate = useNavigate();
+    const location = useLocation();
 
     const handleLogout = () => {
         logout();
@@ -31,11 +32,23 @@ export const Navbar: React.FC = () => {
                         {isAuthenticated ? (
                             <>
                                 <div className="hidden md:flex items-center gap-6">
-                                    <Link to="/" className="text-sm font-semibold text-slate-300 hover:text-white transition-colors flex items-center gap-2">
+                                    <Link
+                                        to="/"
+                                        className={`text-sm font-semibold transition-all flex items-center gap-2 px-3 py-2 rounded-xl ${location.pathname === '/'
+                                            ? 'text-white bg-white/10'
+                                            : 'text-slate-300 hover:text-white hover:bg-white/5'
+                                            }`}
+                                    >
                                         <LayoutDashboard className="w-4 h-4" />
                                         Dashboard
                                     </Link>
-                                    <Link to="/my-applications" className="text-sm font-semibold text-slate-300 hover:text-white transition-colors flex items-center gap-2">
+                                    <Link
+                                        to="/my-applications"
+                                        className={`text-sm font-semibold transition-all flex items-center gap-2 px-3 py-2 rounded-xl ${location.pathname === '/my-applications'
+                                            ? 'text-white bg-white/10'
+                                            : 'text-slate-300 hover:text-white hover:bg-white/5'
+                                            }`}
+                                    >
                                         <Send className="w-4 h-4" />
                                         Mis Postulaciones
                                     </Link>

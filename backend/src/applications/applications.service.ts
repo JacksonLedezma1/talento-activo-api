@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Application } from './application.entity';
+import { Application, ApplicationStatus } from './application.entity';
 import { Vacancy } from '../vacancies/vacancy.entity';
 
 @Injectable()
@@ -56,14 +56,15 @@ export class ApplicationsService {
 
     const activeApplicationsCount = await this.applicationsRepository
       .createQueryBuilder('application')
-      .innerJoin('application.vacancy', 'vacancy')
       .where('application.userId = :userId', { userId: input.userId })
-      .andWhere('vacancy.isActive = :active', { active: true })
+      .andWhere('application.status IN (:...statuses)', {
+        statuses: [ApplicationStatus.ACTIVA, ApplicationStatus.EN_PROCESO]
+      })
       .getCount();
 
     if (activeApplicationsCount >= 3) {
       throw new BadRequestException(
-        'No puedes postularte a más de tres vacantes activas.',
+        'Ya tienes 3 postulaciones en curso. Debes esperar a que finalice alguna para aplicar a otra.',
       );
     }
 
@@ -76,20 +77,51 @@ export class ApplicationsService {
   }
 
   findAll(input?: { vacancyId?: number; userId?: number }) {
-    const where: any = {};
+    const query = this.applicationsRepository.createQueryBuilder('application')
+      .leftJoinAndSelect('application.user', 'user')
+      .leftJoinAndSelect('application.vacancy', 'vacancy')
+      .loadRelationCountAndMap('vacancy.applicantsCount', 'vacancy.applications');
 
     if (input?.vacancyId) {
-      where.vacancy = { id: input.vacancyId };
+      query.andWhere('application.vacancyId = :vacancyId', { vacancyId: input.vacancyId });
     }
 
     if (input?.userId) {
-      where.user = { id: input.userId };
+      query.andWhere('application.userId = :userId', { userId: input.userId });
     }
 
-    return this.applicationsRepository.find({
-      where,
-      relations: { user: true, vacancy: true },
-      order: { appliedAt: 'DESC' },
+    return query
+      .orderBy('application.appliedAt', 'DESC')
+      .getMany();
+  }
+  async updateStatus(id: number, status: ApplicationStatus) {
+    const application = await this.applicationsRepository.findOne({
+      where: { id },
     });
+
+    if (!application) {
+      throw new NotFoundException('Aplicación no encontrada.');
+    }
+
+    application.status = status;
+    return this.applicationsRepository.save(application);
+  }
+
+  async remove(id: number) {
+    const application = await this.applicationsRepository.findOne({
+      where: { id },
+    });
+
+    if (!application) {
+      throw new NotFoundException('Aplicación no encontrada.');
+    }
+
+    if (application.status !== ApplicationStatus.ACTIVA) {
+      throw new BadRequestException(
+        'Solo se pueden eliminar postulaciones que no hayan iniciado el proceso (estado "Activa").',
+      );
+    }
+
+    return this.applicationsRepository.remove(application);
   }
 }

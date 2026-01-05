@@ -62,4 +62,8 @@ export class Vacancy {
     (application: Application) => application.vacancy,
   )
   applications: Application[];
+
+  applicantsCount?: number;
+  hasApplied?: boolean;
+  applicationStatus?: string;
 }
